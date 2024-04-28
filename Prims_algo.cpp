@@ -1,84 +1,60 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <climits>
+// #include <climits> // For INT_MAX
 using namespace std;
 
-#define INF INT_MAX
-
-// Structure to represent an edge in the graph
-struct Edge {
-    int to;
-    int weight;
-};
-
-// Function to find the minimum spanning tree using Prim's algorithm
-void primMST(const vector<vector<Edge>>& graph, int startVertex) {
-    int V = graph.size();
-    vector<int> parent(V, -1); // To store the parent of each vertex in the MST
-    vector<int> key(V, INF);   // To store the key (minimum weight) of each vertex
-    vector<bool> inMST(V, false); // To keep track of vertices included in MST
-
-    // Priority queue to store vertices with their key values
+int spanningTree(int V, vector<pair<int, int>> adj[]) {
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-
-    // Initialize the start vertex with key 0
-    key[startVertex] = 0;
-    pq.push({0, startVertex});
-
-    // Prim's algorithm
+    // Visited Array
+    bool visited[V] = {false};
+    // Pushing the start Node
+    pq.push({0, 0});
+    int sum = 0;
     while (!pq.empty()) {
-        int u = pq.top().second;
+        auto it = pq.top();
         pq.pop();
 
-        // Include vertex u in MST
-        inMST[u] = true;
+        int node = it.second;
+        int wt = it.first;
 
-        // Update key value and parent index of adjacent vertices
-        for (const Edge& edge : graph[u]) {
-            int v = edge.to;
-            int weight = edge.weight;
-            if (!inMST[v] && weight < key[v]) {
-                parent[v] = u;
-                key[v] = weight;
-                pq.push({key[v], v});
+        if (visited[node]) continue;
+        visited[node] = true;
+        sum += wt;
+
+        for (auto it : adj[node]) {
+            int adjNode = it.first;
+            int edgW = it.second;
+            if (!visited[adjNode]) {
+                pq.push({edgW, adjNode});
             }
         }
     }
-
-    // Print the MST
-    cout << "Minimum Spanning Tree:" << endl;
-    for (int i = 1; i < V; ++i) {
-        cout << "Edge: " << parent[i] << " - " << i << " Weight: " << key[i] << endl;
-    }
+    return sum;
 }
 
 int main() {
-    // Example graph
-    int V = 5; // Number of vertices
-    vector<vector<Edge>> graph(V);
+    int V;
+    cout << "Enter the number of vertices: ";
+    cin >> V;
 
-    // Add edges
-    graph[0].push_back({1, 2});
-    graph[0].push_back({3, 6});
-    graph[1].push_back({0, 2});
-    graph[1].push_back({2, 3});
-    graph[1].push_back({3, 8});
-    graph[1].push_back({4, 5});
-    graph[2].push_back({1, 3});
-    graph[2].push_back({4, 7});
-    graph[3].push_back({0, 6});
-    graph[3].push_back({1, 8});
-    graph[3].push_back({4, 9});
-    graph[4].push_back({1, 5});
-    graph[4].push_back({2, 7});
-    graph[4].push_back({3, 9});
+    vector<pair<int, int>> adj[V];
 
-    // Start vertex for Prim's algorithm
-    int startVertex = 0;
+    int E;
+    cout << "Enter the number of edges: ";
+    cin >> E;
 
-    // Find and print the minimum spanning tree
-    primMST(graph, startVertex);
+    cout << "Enter the edges in the format 'u v weight':" << endl;
+    for (int i = 0; i < E; ++i) {
+        int u, v, weight;
+        cin >> u >> v >> weight;
+
+        adj[u].push_back({v, weight});
+        adj[v].push_back({u, weight});
+    }
+
+    int mst_sum = spanningTree(V, adj);
+    cout << "The sum of weights in the minimum spanning tree is: " << mst_sum << endl;
 
     return 0;
 }
